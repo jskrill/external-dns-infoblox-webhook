@@ -174,18 +174,6 @@ func NewInfobloxProvider(cfg *StartupConfig, domainFilter endpoint.DomainFilter)
 	return provider, nil
 }
 
-func recordQueryParams(zone string, view string) *ibclient.QueryParams {
-	searchFields := map[string]string{}
-	if zone != "" {
-		searchFields["zone"] = zone
-	}
-
-	if view != "" {
-		searchFields["view"] = view
-	}
-	return ibclient.NewQueryParams(false, searchFields)
-}
-
 // Records gets the current records.
 func (p *Provider) Records(_ context.Context) (endpoints []*endpoint.Endpoint, err error) {
 	zones, err := p.zones()
@@ -519,8 +507,11 @@ func (p *Provider) zones() ([]ibclient.ZoneAuth, error) {
 			View: &p.config.View,
 		},
 	)
-	queryParams := recordQueryParams("", p.config.View)
-	err := p.client.GetObject(obj, "", queryParams, &res)
+	searchFields := map[string]string{}
+	if p.config.View != "" {
+		searchFields["view"] = p.config.View
+	}
+	err := PagingGetObject(p.client, obj, "", searchFields, &res)
 	if err != nil && !isNotFoundError(err) {
 		return nil, err
 	}
@@ -630,6 +621,7 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 		obj.Ipv4Addr = &ep.Targets[0]
 		obj.Ttl = &ttl
 		obj.UseTtl = &ptrToBoolTrue
+		obj.View = p.config.View
 		if getObject {
 			queryParams := ibclient.NewQueryParams(false, map[string]string{"name": *obj.Name, "ipv4addr": *obj.Ipv4Addr})
 			err = p.client.GetObject(obj, "", queryParams, &res)
@@ -650,6 +642,7 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 		obj.Ipv4Addr = &ep.Targets[0]
 		obj.Ttl = &ttl
 		obj.UseTtl = &ptrToBoolTrue
+		obj.View = p.config.View
 		if getObject {
 			queryParams := ibclient.NewQueryParams(false, map[string]string{"name": *obj.PtrdName})
 			err = p.client.GetObject(obj, "", queryParams, &res)
@@ -668,6 +661,7 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 		obj.Canonical = &ep.Targets[0]
 		obj.Ttl = &ttl
 		obj.UseTtl = &ptrToBoolTrue
+		obj.View = &p.config.View
 		if getObject {
 			queryParams := ibclient.NewQueryParams(false, map[string]string{"name": *obj.Name})
 			err = p.client.GetObject(obj, "", queryParams, &res)
@@ -691,6 +685,7 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 		obj.Name = &ep.DNSName
 		obj.Ttl = &ttl
 		obj.UseTtl = &ptrToBoolTrue
+		obj.View = &p.config.View
 		// TODO: Zone?
 		if getObject {
 			queryParams := ibclient.NewQueryParams(false, map[string]string{"name": *obj.Name})
