@@ -174,18 +174,6 @@ func NewInfobloxProvider(cfg *StartupConfig, domainFilter endpoint.DomainFilter)
 	return provider, nil
 }
 
-func recordQueryParams(zone string, view string) *ibclient.QueryParams {
-	searchFields := map[string]string{}
-	if zone != "" {
-		searchFields["zone"] = zone
-	}
-
-	if view != "" {
-		searchFields["view"] = view
-	}
-	return ibclient.NewQueryParams(false, searchFields)
-}
-
 // Records gets the current records.
 func (p *Provider) Records(_ context.Context) (endpoints []*endpoint.Endpoint, err error) {
 	zones, err := p.zones()
@@ -519,8 +507,11 @@ func (p *Provider) zones() ([]ibclient.ZoneAuth, error) {
 			View: &p.config.View,
 		},
 	)
-	queryParams := recordQueryParams("", p.config.View)
-	err := p.client.GetObject(obj, "", queryParams, &res)
+	searchFields := map[string]string{}
+	if p.config.View != "" {
+		searchFields["view"] = p.config.View
+	}
+	err := PagingGetObject(p.client, obj, "", searchFields, &res)
 	if err != nil && !isNotFoundError(err) {
 		return nil, err
 	}
@@ -637,6 +628,10 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 				err = fmt.Errorf("could not fetch A record ['%s':'%s'] : %w", *obj.Name, *obj.Ipv4Addr, err)
 				return
 			}
+		} else {
+			// If getObject is not set (action == create), we need to set the View for Infoblox to find the parent zone
+			// If View is set for the other actions, Infoblox will complain that the view field is not allowed
+			obj.View = p.config.View
 		}
 		recordSet = infobloxRecordSet{
 			obj: obj,
@@ -656,6 +651,10 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 			if err != nil && !isNotFoundError(err) {
 				return
 			}
+		} else {
+			// If getObject is not set (action == create), we need to set the View for Infoblox to find the parent zone
+			// If View is set for the other actions, Infoblox will complain that the view field is not allowed
+			obj.View = p.config.View
 		}
 		recordSet = infobloxRecordSet{
 			obj: obj,
@@ -674,6 +673,10 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 			if err != nil && !isNotFoundError(err) {
 				return
 			}
+		} else {
+			// If getObject is not set (action == create), we need to set the View for Infoblox to find the parent zone
+			// If View is set for the other actions, Infoblox will complain that the view field is not allowed
+			obj.View = &p.config.View
 		}
 		recordSet = infobloxRecordSet{
 			obj: obj,
@@ -698,6 +701,10 @@ func (p *Provider) recordSet(ep *endpoint.Endpoint, getObject bool) (recordSet i
 			if err != nil && !isNotFoundError(err) {
 				return
 			}
+		} else {
+			// If getObject is not set (action == create), we need to set the View for Infoblox to find the parent zone
+			// If View is set for the other actions, Infoblox will complain that the view field is not allowed
+			obj.View = &p.config.View
 		}
 		recordSet = infobloxRecordSet{
 			obj: obj,
