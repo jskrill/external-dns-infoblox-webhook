@@ -1,7 +1,18 @@
 # Changelog
 
-## [1.1.1](https://github.com/AbsaOSS/external-dns-infoblox-webhook/compare/v1.1.0...v1.1.1) (2024-06-06)
+## [1.1.1-fix](https://github.com/jskrill/external-dns-infoblox-webhook/compare/v1.1.1...v1.1.1-fix) (2024-10-01)
 
+### Features
+
+* Infoblox paging support ([f457da8](https://github.com/jskrill/external-dns-infoblox-webhook/commit/f457da8a091c062b6c264157aca94519b2805eb8))
+
+### Bug Fixes
+
+* test release ([350ffd0](https://github.com/jskrill/external-dns-infoblox-webhook/commit/350ffd0d05e6f8160cca72eb575013099c667e42))
+
+### Miscellaneous Chores
+
+## [1.1.1](https://github.com/AbsaOSS/external-dns-infoblox-webhook/compare/v1.1.0...v1.1.1) (2024-06-06)
 
 ### Bug Fixes
 
