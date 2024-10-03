@@ -1,11 +1,6 @@
 # Changelog
 
-## [2.0.0](https://github.com/jskrill/external-dns-infoblox-webhook/compare/v1.1.1...v2.0.0) (2024-10-03)
-
-
-### ⚠ BREAKING CHANGES
-
-* Initial commit
+## 1.1.1-fix2](https://github.com/jskrill/external-dns-infoblox-webhook/compare/v1.1.1...v1.1.1-fix2) (2024-10-03)
 
 ### Features
 
